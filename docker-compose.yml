@@ -11,7 +11,11 @@ services:
     build: ./chatbot
     command: >
       sh -c "
-            python3 manage.py runserver 0.0.0.0:8000"
+      python manage.py migrate &&
+      python manage.py makemigrations &&
+      python manage.py collectstatic --noinput &&
+
+      daphne -b 0.0.0.0 -p 8000 chatbot.asgi:application"
     ports:
       - "8000:8000"
     depends_on:
@@ -22,7 +26,8 @@ services:
       - REDIS_PORT=6379
     restart: unless-stopped
     volumes:
-      - ./chatbot:/chatbot
-
+      - ./chatbot:/chatbot 
+      - staticfiles:/static
 volumes:
   redis_data:
+  staticfiles:
